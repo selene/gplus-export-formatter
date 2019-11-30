@@ -1,0 +1,176 @@
+<!HTML>
+<html>
+<head>
+  <title>G+ Json Formatter</title>
+  
+  <style>
+    .post img {
+      height: 50px;
+      width: 50px;
+    }
+
+    .comment {
+      margin-left: 50px;
+    }
+
+    .group-pic {
+      display: block;
+      height: 100px;
+      
+    }
+
+    .community, .collection {
+      border-top: 1px solid silver;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="output">
+  </div>
+
+  <script type="text/javascript">
+    function formatPostHeader(post) {
+      let visibility = post.isPublic ? 'Public' : 'Private'
+      return `<h3><img src=${post.author.image} /> ${post.author.name} > ${visibility}</h3>`;
+    }
+
+    function formatBlockInline(block) {
+      let formatted = block[1];
+
+      if (block.length == 3) {
+        let formatting = block[2];
+        if(formatting.bold) {
+          formatted = `<b>${formatted}</b>`;
+        }
+        if(formatting.italic) {
+          formatted = `<i>${formatted}</i>`;
+        }
+        if(formatting.strikethrough) {
+          formatted = `<s>${formatted}</s>`;
+        }
+      }
+      return formatted;
+    }
+
+    function formatBlockNewLine(block) {
+      return "<br>";
+    }
+
+    function formatBlockLink(block) {
+      return `<a href="${block[2]}">${block[1]}</a>`;
+    }
+
+    function formatBlockMention(block) {
+      return `+<a href="https://plus.google.com/u/0/${block[2]}">${block[1]}</a>`;
+    }
+
+    function formatBlockHashtag(block) {
+      return `<a href="${block[2]}">${block[1]}</a>`;
+    }
+
+    function formatMessage(message) {
+      return message.map(b => {
+        switch(b[0]) {
+          case 0: return formatBlockInline(b);
+          case 1: return formatBlockNewLine(b);
+          case 2: return formatBlockLink(b);
+          case 3: return formatBlockMention(b);
+          case 4: return formatBlockHashtag(b);
+        }
+      }).join('\n');
+    }
+
+    function formatComment(comment) {
+      return `<h4><img src="${comment.author.image}" /> ${comment.author.name}</h4>
+      <p>${formatMessage(comment.message)}</p>
+      <p>${(new Date(comment.createdAt)).toLocaleDateString()}</p>
+      `
+    }
+
+    function formatPostComments(comments) {
+      if (comments.length == 0) {
+        return 'No comments';
+      }
+      let formattedComments = comments.map(c => `<div class="comment">${formatComment(c)}</div>`);
+      return `<div class="comments">
+        ${formattedComments}
+      </div>\n`;
+    }
+
+    function formatPost(post) {
+      return `<div class="post">
+      ${formatPostHeader(post)}
+      <p class="message">${formatMessage(post.message)}</p>
+      <p class="comments"${formatPostComments(post.comments)}</p>
+      <!--<div>${JSON.stringify(post)}</div>-->
+      </div>\n`;
+    }
+
+    function formatPosts(posts) {
+      return `<div class="posts">
+      <h2>Posts</h2>
+      ${posts.map(p => formatPost(p)).join('\n')}
+      </div>\n`;
+    }
+
+
+
+    function formatCollection(collection) {
+      let collectionHeader = `<h2>Collection: ${collection.name}</h2>`;
+      let formattedPosts = collection.posts.map(p => formatPost(p)).join('\n');
+      return `<div class="collection">
+      ${collectionHeader}
+      ${formattedPosts}
+      </div>`;
+    }
+
+    function formatCollections(collections) {
+      return collections.map(c => formatCollection(c)).join('\n');
+    }
+
+    function formatCommunityCategory(category) {
+      let categoryHeader = `<h3>${category.name}</h3>`;
+      let formattedPosts = category.posts.map(p => formatPost(p)).join('\n');
+      return `<div class="category">
+      ${categoryHeader}
+      ${formattedPosts}
+      </div>`;
+    }
+
+    function formatCommunity(community) {
+      let formattedCategories = community.categories.map(cc => formatCommunityCategory(cc)).join('\n');
+      return `<div class="community">
+      <h2><img src="${community.image}" class="group-pic"/>${community.name}</h2>
+      <div class="tagline">${community.tagline}</div>
+        ${formattedCategories}
+      </div>`;
+    }
+
+    function formatCommunities(communities) {
+      return communities.map(c => formatCommunity(c)).join('\n');
+
+    }
+
+    function formatFeed(oEvent) {
+      console.log('oEvent', oEvent);
+
+      const sampleJson = JSON.parse(this.responseText);
+      document.getElementById('output').innerHTML = formatPosts(sampleJson.accounts[0].posts);
+      document.getElementById('output').innerHTML += formatCollections(sampleJson.accounts[0].collections);
+      document.getElementById('output').innerHTML += formatCommunities(sampleJson.accounts[0].communities);
+    }
+
+    (function loadFeed() {
+      console.log('loadFeed()');
+      var oReq = new XMLHttpRequest();
+      oReq.addEventListener("load", formatFeed);
+
+      oReq.open("GET", './sample.json');
+      oReq.send();
+      console.log('oReq readyState', oReq.readyState);
+      // oReq.open("GET", './g+-feed-108010690094698713721-s-tan-profile-20191129-1of1.json');
+    })();
+  </script>
+</body>
+</html>
