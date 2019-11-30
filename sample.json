@@ -1,4 +1,4 @@
-var sampleJson = {
+{
   "exportedAt": "2018-12-20T07:46:03.583Z",
   "accounts": [{
     "id": "105750980959577516811",
@@ -240,4 +240,4 @@ var sampleJson = {
       }
     ]
   }]
-};
+}
