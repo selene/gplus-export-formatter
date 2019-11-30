@@ -26,6 +26,10 @@
 </head>
 
 <body>
+  <div id="interface">
+    <h1>G+ JSON Export Formatter</h1>
+    <label>Upload File:</label><input type="file" id="input" onchange="loadFeed(this.files)">
+  </div>
   <div id="output">
   </div>
 
@@ -152,25 +156,18 @@
 
     }
 
-    function formatFeed(oEvent) {
-      console.log('oEvent', oEvent);
-
-      const sampleJson = JSON.parse(this.responseText);
+    function formatFeed(feedText) {
+      const sampleJson = JSON.parse(feedText);
       document.getElementById('output').innerHTML = formatPosts(sampleJson.accounts[0].posts);
       document.getElementById('output').innerHTML += formatCollections(sampleJson.accounts[0].collections);
       document.getElementById('output').innerHTML += formatCommunities(sampleJson.accounts[0].communities);
     }
 
-    (function loadFeed() {
-      console.log('loadFeed()');
-      var oReq = new XMLHttpRequest();
-      oReq.addEventListener("load", formatFeed);
-
-      oReq.open("GET", './sample.json');
-      oReq.send();
-      console.log('oReq readyState', oReq.readyState);
-      // oReq.open("GET", './g+-feed-108010690094698713721-s-tan-profile-20191129-1of1.json');
-    })();
+    function loadFeed(fileList) {
+      fileList.item(0).text().then(formatFeed);
+    }
   </script>
+
+
 </body>
 </html>
