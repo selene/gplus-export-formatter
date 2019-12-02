@@ -29,7 +29,15 @@
 <body>
   <div id="interface">
     <h1>G+ JSON Export Formatter</h1>
-    <label>Upload File:</label><input type="file" id="input" onchange="loadFeed(this.files)">
+    <p>Format JSON exports from <a href="https://medium.com/google-plus-exporter">Google+ Exporter</a> into HTML.</p>
+    <p>Upload one file at a time. Processing is done on your computer only. Your file remains private to you.</p>
+    <p><a href="https://github.com/selene/gplus-export-formatter">See the source code on GitHub</a></p>
+    <label for="input">Upload File: </label>
+    <input
+      id="input"
+      name="input"
+      onchange="loadFeed(this.files)"
+      type="file" >
   </div>
   <div id="download">
   </div>
@@ -208,7 +216,5 @@
       fileList.item(0).text().then(formatFeed);
     }
   </script>
-
-
 </body>
 </html>
