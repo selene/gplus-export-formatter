@@ -1,6 +1,7 @@
 <!HTML>
 <html>
 <head>
+  <meta charset="utf-8" />
   <title>G+ Json Formatter</title>
   
   <style>
@@ -111,7 +112,6 @@
       ${formatPostHeader(post)}
       <p class="message">${formatMessage(post.message)}</p>
       <p class="comments"${formatPostComments(post.comments)}</p>
-      <!--<div>${JSON.stringify(post)}</div>-->
       </div>\n`;
     }
 
@@ -160,20 +160,30 @@
 
     }
 
-    function formatFeed(feedText) {
-      const sampleJson = JSON.parse(feedText);
+    function createExport(html) {
+      let exportHtml;
+      const thisStyles = document.getElementsByTagName('style')[0];
 
-      const html = formatPosts(sampleJson.accounts[0].posts) +
-        formatCollections(sampleJson.accounts[0].collections) +
-        formatCommunities(sampleJson.accounts[0].communities);
+      exportHtml = `<!HTML>
+      <html>
+      <head>
+        <meta charset="utf-8" />
+        <title>G+ Export</title>
+        <style>
+          ${thisStyles.innerText}
+        </style>
+      </head>
+      <body>
+        <h1>G+ Export</h1>
+        ${html}
+      </body>
+      </html>`
 
-      const blob = new Blob([html], {type: 'text/html'});
+      const blob = new Blob([exportHtml], {type: 'text/html'});
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
       link.innerText = "Download HTML";
-      
-      document.getElementById('output').innerHTML = html;
 
       if (downloadLink) {
         document.getElementById('download').replaceChild(link, downloadLink);
@@ -181,6 +191,17 @@
         document.getElementById('download').appendChild(link);
       }
       downloadLink = link;
+    }
+
+    function formatFeed(feedText) {
+      const sampleJson = JSON.parse(feedText);
+
+      const html = formatPosts(sampleJson.accounts[0].posts) +
+        formatCollections(sampleJson.accounts[0].collections) +
+        formatCommunities(sampleJson.accounts[0].communities);
+
+      document.getElementById('output').innerHTML = html;
+      createExport(html);
     }
 
     function loadFeed(fileList) {
